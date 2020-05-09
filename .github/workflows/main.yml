@@ -42,9 +42,9 @@ jobs:
     # Test the playbook's idempotence.
     - name: Test playbook idempotence
       run: |
-      idempotence=$(mktemp)
-      "ansible-playbook --extra-vars '{\"configure_sudoers\":\"false\"}' main.yml | tee -a ${idempotence}"
-      >
+        idempotence=$(mktemp)
+        "ansible-playbook --extra-vars '{\"configure_sudoers\":\"false\"}' main.yml | tee -a ${idempotence}"
+        >
         tail ${idempotence}
         | grep -q 'changed=0.*failed=0'
         && (echo 'Idempotence test: pass' && exit 0)
