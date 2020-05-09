@@ -21,7 +21,7 @@ jobs:
       run: |
         sudo mkdir -p /etc/ansible
         sudo touch /etc/ansible/hosts
-        "echo -e '[local]\nlocalhost ansible_connection=local' | sudo tee -a /etc/ansible/hosts > /dev/null"
+        echo -e '[local]\nlocalhost ansible_connection=local' | sudo tee -a /etc/ansible/hosts > /dev/null
 
     # Install dependencies.
     - name: Install Ansible Dependencies (Roles)
@@ -43,7 +43,7 @@ jobs:
     - name: Test playbook idempotence
       run: |
         idempotence=$(mktemp)
-        "ansible-playbook --extra-vars '{\"configure_sudoers\":\"false\"}' main.yml | tee -a ${idempotence}"
+        ansible-playbook --extra-vars '{\"configure_sudoers\":\"false\"}' main.yml | tee -a ${idempotence}
         >
         tail ${idempotence}
         | grep -q 'changed=0.*failed=0'
