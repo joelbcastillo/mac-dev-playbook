@@ -35,11 +35,11 @@ jobs:
       run: cp tests/config.yml config.yml
 
     - name: Test the playbook
-      run: ansible-playbook --extra-vars '{\"configure_sudoers\":\"false\"}' main.yml
+      run: ansible-playbook --extra-vars '{\"configure_sudoers\":\"true\"}' main.yml
 
     - name: Test playbook idempotence
       run: |
         idempotence=$(mktemp)
-        ansible-playbook --extra-vars '{\"configure_sudoers\":\"false\"}' main.yml | tee -a ${idempotence}
+        ansible-playbook --extra-vars '{\"configure_sudoers\":\"true\"}' main.yml | tee -a ${idempotence}
         tail ${idempotence} | grep -q 'changed=0.*failed=0'  && \
          (echo 'Idempotence test: pass' && exit 0) || (echo 'Idempotence test: fail' && exit 1)
