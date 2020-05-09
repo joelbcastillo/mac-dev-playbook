@@ -9,43 +9,40 @@ jobs:
     runs-on: macos-latest
 
     steps:
-    # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
     - uses: actions/checkout@v2
 
-    # Add ansible.cfg to pick up roles path.
+    - name: Install Ansible
+      uses: BSFishy/pip-action@v1
+      with:
+        packages: ansible  
+
     - name: Setup `ansible.cfg` to pickup roles path
       run: "{ echo '[defaults]'; echo 'roles_path = ../'; } >> ansible.cfg"
-    
-    # Add a hosts file
+
     - name: Add Ansible Hosts file
       run: |
         sudo mkdir -p /etc/ansible
         sudo touch /etc/ansible/hosts
-        "echo -e '[local]\nlocalhost ansible_connection=local' | sudo tee -a /etc/ansible/hosts > /dev/null"
+        echo -e '[local]\nlocalhost ansible_connection=local' | sudo tee -a /etc/ansible/hosts > /dev/null
 
-    # Install dependencies.
     - name: Install Ansible Dependencies (Roles)
       run: ansible-galaxy install -r requirements.yml
 
-    # Check the role/playbook's syntax.
     - name: Check Ansible Playbook Syntax
       run: ansible-playbook main.yml --syntax-check
 
-    # Copy test config.yml into place.
     - name: Copy test config.yml into place
       run: cp tests/config.yml config.yml
 
-    # Test the playbook.
     - name: Test the playbook
-      run: ansible-playbook --extra-vars '{\"configure_sudoers\":\"false\"}' main.yml"
+      run: ansible-playbook --extra-vars '{\"configure_sudoers\":\"true\"}' main.yml
 
-    # Test the playbook's idempotence.
+    - name: Setup tmate session
+      uses: mxschmitt/action-tmate@v2
+      
     - name: Test playbook idempotence
       run: |
         idempotence=$(mktemp)
-        "ansible-playbook --extra-vars '{\"configure_sudoers\":\"false\"}' main.yml | tee -a ${idempotence}"
-        >
-        tail ${idempotence}
-        | grep -q 'changed=0.*failed=0'
-        && (echo 'Idempotence test: pass' && exit 0)
-        || (echo 'Idempotence test: fail' && exit 1)
+        ansible-playbook --extra-vars '{\"configure_sudoers\":\"true\"}' main.yml | tee -a ${idempotence}
+        tail ${idempotence} | grep -q 'changed=0.*failed=0'  && \
+         (echo 'Idempotence test: pass' && exit 0) || (echo 'Idempotence test: fail' && exit 1)
