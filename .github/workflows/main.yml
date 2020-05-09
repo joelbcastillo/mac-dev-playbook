@@ -35,7 +35,7 @@ jobs:
       run: cp tests/config.yml config.yml
 
     - name: Test the playbook
-      run: ansible-playbook --extra-vars '{\"configure_sudoers\":\"false\"}' main.yml"
+      run: ansible-playbook --extra-vars '{\"configure_sudoers\":\"false\"}' main.yml
 
     - name: Test playbook idempotence
       run: |
